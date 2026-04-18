@@ -1,13 +1,31 @@
-import { connect } from "mongoose";
+import mongoose from "mongoose";
+
+let isConnected = false;
+let connectingPromise: Promise<typeof mongoose> | null = null;
 
 export const connectMongoDB = async () => {
+    if (isConnected) return true;
+
+    const { MONGO_CONNECTION_URL } = process.env;
+    if (!MONGO_CONNECTION_URL) {
+        throw new Error("MONGO_CONNECTION_URL is missing");
+    }
+
     try {
-        const { MONGO_CONNECTION_URL } = process.env;
-        console.log(MONGO_CONNECTION_URL);
-        await connect(MONGO_CONNECTION_URL || "");
-        console.log("connected to mongoDB");
+        if (!connectingPromise) {
+            connectingPromise = mongoose.connect(MONGO_CONNECTION_URL, {
+                serverSelectionTimeoutMS: 30000,
+            });
+        }
+
+        await connectingPromise;
+        isConnected = true;
+        console.log("Connected to MongoDB");
         return true;
     } catch (error) {
-        console.log("Failed to Connect with MongoDB");
+        connectingPromise = null;
+        isConnected = false;
+        console.log("Failed to connect with MongoDB", error);
+        throw error;
     }
-}
+};

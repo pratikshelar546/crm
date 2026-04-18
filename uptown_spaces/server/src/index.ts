@@ -21,9 +21,19 @@ app.use(express.urlencoded({ extended: true }));
 // })
 
 // app.use("/",limiter)
-connectMongoDB();
 registerRoutes(app);
 
-app.listen(5003, () => {
-  console.log('Server is running on port 5001');
-});
+const startServer = async () => {
+  try {
+    await connectMongoDB();
+    const port = Number(process.env.PORT) || 5003;
+    app.listen(port, () => {
+      console.log(`Server is running on port ${port}`);
+    });
+  } catch (error) {
+    console.error('Failed to start server', error);
+    process.exit(1);
+  }
+};
+
+startServer();
