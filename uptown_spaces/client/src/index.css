@@ -1,0 +1,7 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    @apply min-h-screen antialiased text-slate-700 bg-slate-100;
+  }
+}
