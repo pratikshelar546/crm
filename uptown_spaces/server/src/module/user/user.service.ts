@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
+import jwt, { type SignOptions } from "jsonwebtoken";
 import { Users } from "./user.schema.js";
 
 type SignupInput = {
@@ -18,9 +18,13 @@ const normalizeEmail = (email: string) => email.trim().toLowerCase();
 const JWT_SECRET = process.env.JWT_SECRET ?? "dev-secret-key";
 const JWT_EXPIRES_IN = (process.env.JWT_EXPIRES_IN ?? "1d");
 
-const signAccessToken = (payload: { userId: string; email: string }) =>
-  jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+const signAccessToken = (payload: { userId: string; email: string }) => {
+  const options: SignOptions = {
+    expiresIn: "1h", // or JWT_EXPIRES_IN
+  };
 
+  return jwt.sign(payload, JWT_SECRET, options);
+};
 export const signupUser = async ({ name, email, password }: SignupInput) => {
   const normalizedEmail = normalizeEmail(email);
   const existingUser = await Users.findOne({ email: normalizedEmail });
